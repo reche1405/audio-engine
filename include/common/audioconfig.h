@@ -6,13 +6,24 @@
 #include <vector>
 #include <optional>
 
+
+
 namespace AudioEngine {
+
+    const int DEFAULT_SAMPLE_RATE = 48000;
+    const int DEFAULT_BUFFER_SIZE = 512;
+    const int DEFAULT_CHANNELS = 2;
 // Audio format support
 enum class SampleFormat {
     Float32,    // 32-bit float (most common)
     Int16,      // 16-bit integer (CD quality)
     Int24,      // 24-bit integer (pro audio)
     Int32       // 32-bit integer
+};
+
+enum class BufferFormat {
+    Planar, 
+    Interleaved
 };
 
 // Buffer behavior
@@ -59,14 +70,14 @@ struct StreamConfig {
     std::optional<std::string> outputDeviceName;
 
     // Stream parameters
-    int sampleRate = 48000;
-    int bufferSize = 512;     // Frames per buffer
-    int inputChannels = 2;
-    int outputChannels = 2;
+    int sampleRate = DEFAULT_SAMPLE_RATE;
+    int bufferSize = DEFAULT_BUFFER_SIZE;     // Frames per buffer
+    int inputChannels = DEFAULT_CHANNELS;
+    int outputChannels = DEFAULT_CHANNELS;
 
     // Format
-    SampleFormat format = SampleFormat::Float32;
-
+    SampleFormat sampleFormat = SampleFormat::Float32;
+    BufferFormat BufferFormat = BufferFormat::Planar;
     // Behavior
     BufferStrategy bufferStrategy = BufferStrategy::Stable;
     bool allowSampleRateChange = false;
@@ -79,6 +90,12 @@ struct StreamConfig {
     // Validation
     bool isValid() const;
     std::string toString() const;
+};
+
+struct StreamContext {
+    double sampleRate;
+    uint64_t streamTime;
+    bool isSilence;
 };
 
 // Latency measurements
