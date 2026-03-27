@@ -60,6 +60,14 @@ namespace AudioEngine {
                     }
                 }
 
+                // Get Buffer Sizes
+                snd_pcm_uframes_t minBSize;
+                snd_pcm_uframes_t maxBSize;
+                snd_pcm_hw_params_get_buffer_size_min(params, &minBSize);
+                snd_pcm_hw_params_get_buffer_size_min(params, &maxBSize);
+                
+                
+
                 // Test for Interleaved support
                 if (snd_pcm_hw_params_test_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED) == 0) {
                     std::cout << "Device supports Interleaved (LRLR)" << std::endl;
@@ -95,6 +103,28 @@ namespace AudioEngine {
                 }
 
             }
+    
+            void set_input_device() override;
+
+            void set_output_device() override;
+
+
+            // Sample Rate Management
+            void set_sample_rate(int sampleRate) override;
+            
+            // Buffer Size Management
+            void set_buffer_szie(int bufferSize) override;
+
+            // Audio Callback
+            void process_audio(AudioBuffer& input, AudioBuffer& output, StreamContext& context ) override;
+            
+            // Stream Management
+            void open_stream(StreamConfig config) override;
+            void close_stream() override;
+
+            void start_stream() override;
+            void stop_stream() override;
+        
     };
 
     

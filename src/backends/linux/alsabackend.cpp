@@ -45,6 +45,44 @@ namespace AudioEngine {
                 snd_device_name_free_hint(hints);
                 return devices;
             }
+    void ALSABackend::set_input_device() {
+        throw new std::runtime_error("Not implemented");
+    };
+
+        void ALSABackend::set_output_device()  {
+        throw new std::runtime_error("Not implemented");
+    };;
+
+
+    // Sample Rate Management
+        void ALSABackend::set_sample_rate(int sampleRate)  {
+        throw new std::runtime_error("Not implemented");
+    };
+    
+    // Buffer Size Management
+        void ALSABackend::set_buffer_szie(int bufferSize)  {
+        throw new std::runtime_error("Not implemented");
+    };
+
+    // Audio Callback
+        void ALSABackend::process_audio(AudioBuffer& input, AudioBuffer& output, StreamContext& context )  {
+        throw new std::runtime_error("Not implemented");
+    };
+    
+    // Stream Management
+        void ALSABackend::open_stream(StreamConfig config)  {
+        throw new std::runtime_error("Not implemented");
+    };
+        void ALSABackend::close_stream()  {
+        throw new std::runtime_error("Not implemented");
+    };
+
+        void ALSABackend::start_stream()  {
+        throw new std::runtime_error("Not implemented");
+    };
+        void ALSABackend::stop_stream()  {
+        throw new std::runtime_error("Not implemented");
+    };
 
 
 }

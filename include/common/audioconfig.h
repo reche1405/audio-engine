@@ -51,7 +51,7 @@ enum class BackendType {
 // Device capabilities
 struct DeviceCapabilities {
     std::vector<unsigned int> supportedSampleRates;
-    std::vector<unsigned int> supportedBufferSizes;
+    std::vector<uint64_t> supportedBufferSizes;
     std::vector<unsigned int> supportedPeriodSizes;
 
     std::vector<SampleFormat> supportedFormats;
@@ -81,7 +81,7 @@ struct StreamConfig {
 
     // Format
     SampleFormat sampleFormat = SampleFormat::Float32;
-    BufferFormat BufferFormat = BufferFormat::Planar;
+    BufferFormat bufferFormat = BufferFormat::Planar;
     // Behavior
     BufferStrategy bufferStrategy = BufferStrategy::Stable;
     bool allowSampleRateChange = false;

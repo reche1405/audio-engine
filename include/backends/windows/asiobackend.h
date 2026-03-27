@@ -7,10 +7,8 @@ namespace AudioEngine {
         public:
             ASIOBackend() : IAudioBackend(BackendType::ASIO) {
 
-            }
+        }
             
     };
 }
-
-
 #endif

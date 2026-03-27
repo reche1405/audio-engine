@@ -2,7 +2,7 @@
 #define WASAPIBACKEND_H
 #include "../audiobackend.h"
 
-#include <AudioClient.h>
+//#include <AudioClient.h>
 namespace AudioEngine {
     class WASAPIBackend : public IAudioBackend
     {

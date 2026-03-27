@@ -4,9 +4,11 @@
 
     int main(int argc,char *argv[]) {
 
-        //AudioEngine::ALSABackend backend;
-
-        printf("Hello from c++ in wsl.");
+        AudioEngine::ALSABackend backend;
+        std::vector<AudioEngine::AudioDevice> devices = backend.enumerate_devices();
+        for(const auto d : devices) {
+                std::cout << d << std::endl;
+        }
         return 0;
     }
 

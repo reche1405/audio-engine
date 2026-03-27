@@ -16,7 +16,7 @@ namespace AudioEngine {
             // List Devices
             virtual std::vector<AudioDevice> enumerate_devices() = 0;
 
-            virtual DeviceCapabilities device_capabilities(std::string deviceUID) = 0;
+            //virtual DeviceCapabilities device_capabilities(std::string deviceUID) = 0;
             // Select Devices
 
             virtual void set_input_device() = 0;
