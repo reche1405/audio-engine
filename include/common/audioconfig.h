@@ -6,7 +6,8 @@
 #include <vector>
 #include <optional>
 
-
+#include <iostream>
+#include <iomanip>
 
 namespace AudioEngine {
 
@@ -54,6 +55,7 @@ struct DeviceCapabilities {
     std::vector<unsigned int> supportedPeriodSizes;
 
     std::vector<SampleFormat> supportedFormats;
+    std::vector<BufferFormat> supportedBufferFormats;
     unsigned int maxInputChannels;
     unsigned maxOutputChannels;
     bool supportsInput;

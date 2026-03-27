@@ -8,6 +8,7 @@ namespace AudioEngine {
             ASIOBackend() : IAudioBackend(BackendType::ASIO) {
 
             }
+            
     };
 }
 

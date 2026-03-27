@@ -1,5 +1,5 @@
-#ifndef IAUDIOBACKEND_H
-#define IAUDIOBACKEND_H
+#ifndef AUDIOBACKEND_H
+#define AUDIOBACKEND_H
 #include <optional>
 #include <vector>
 #include <memory>
@@ -12,6 +12,7 @@ namespace AudioEngine {
             IAudioBackend(BackendType type = BackendType::Auto) : m_type(type) {
                 
             }
+            ~IAudioBackend() = default;
             // List Devices
             virtual std::vector<AudioDevice> enumerate_devices() = 0;
 
@@ -42,7 +43,7 @@ namespace AudioEngine {
 
 
 
-        private:
+        protected:
             BackendType m_type;
             int m_sampleRate = DEFAULT_SAMPLE_RATE;
             int m_bufferSize = DEFAULT_BUFFER_SIZE;
