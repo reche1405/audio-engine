@@ -61,12 +61,17 @@ namespace AudioEngine {
                 }
 
                 // Get Buffer Sizes
-                snd_pcm_uframes_t minBSize;
-                snd_pcm_uframes_t maxBSize;
+                uint64_t minBSize;
+                uint64_t maxBSize;
                 snd_pcm_hw_params_get_buffer_size_min(params, &minBSize);
-                snd_pcm_hw_params_get_buffer_size_min(params, &maxBSize);
-                
-                
+                snd_pcm_hw_params_get_buffer_size_max(params, &maxBSize);
+                std::vector<uint64_t> bSizes {256, 512, 1024, 2048};
+                for(auto size : bSizes) {
+                    if(size >= minBSize && size <= maxBSize ) {
+                        dev.capabilities.supportedBufferSizes.push_back(size);
+                    }
+                }
+
 
                 // Test for Interleaved support
                 if (snd_pcm_hw_params_test_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED) == 0) {
