@@ -5,10 +5,8 @@
     int main(int argc,char *argv[]) {
 
         AudioEngine::ALSABackend backend;
-        std::vector<AudioEngine::AudioDevice> devices = backend.enumerate_devices();
-        for(const auto d : devices) {
-                std::cout << d << std::endl;
-        }
+        backend.iniitialize();
+        backend.play_sine(440.0f);
         return 0;
     }
 

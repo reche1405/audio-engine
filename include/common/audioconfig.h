@@ -11,8 +11,8 @@
 
 namespace AudioEngine {
 
-    const int DEFAULT_SAMPLE_RATE = 48000;
-    const int DEFAULT_BUFFER_SIZE = 512;
+    const unsigned int DEFAULT_SAMPLE_RATE = 48000;
+    const uint64_t DEFAULT_BUFFER_SIZE = 512;
     const int DEFAULT_CHANNELS = 2;
 // Audio format support
 enum class SampleFormat {
@@ -74,14 +74,14 @@ struct StreamConfig {
     std::optional<std::string> outputDeviceName;
 
     // Stream parameters
-    int sampleRate = DEFAULT_SAMPLE_RATE;
-    int bufferSize = DEFAULT_BUFFER_SIZE;     // Frames per buffer
-    int inputChannels = DEFAULT_CHANNELS;
-    int outputChannels = DEFAULT_CHANNELS;
+    unsigned int  sampleRate = DEFAULT_SAMPLE_RATE;
+    uint64_t bufferSize = DEFAULT_BUFFER_SIZE;     // Frames per buffer
+    unsigned int inputChannels = DEFAULT_CHANNELS;
+    unsigned int outputChannels = DEFAULT_CHANNELS;
 
     // Format
     SampleFormat sampleFormat = SampleFormat::Float32;
-    BufferFormat bufferFormat = BufferFormat::Planar;
+    BufferFormat bufferFormat = BufferFormat::Interleaved;
     // Behavior
     BufferStrategy bufferStrategy = BufferStrategy::Stable;
     bool allowSampleRateChange = false;
