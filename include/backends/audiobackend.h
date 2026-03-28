@@ -2,6 +2,7 @@
 #define AUDIOBACKEND_H
 #include <optional>
 #include <vector>
+#include <atomic>
 #include <memory>
 #include "../common/audioconfig.h"
 #include "../common/audiobuffer.h"
@@ -33,12 +34,12 @@ namespace AudioEngine {
             virtual void set_buffer_szie(int bufferSize) = 0;
 
             // Audio Callback
-            virtual void process_audio(AudioBuffer& input, AudioBuffer& output, StreamContext& context ) = 0;
+            virtual void process_audio(float* input, float* output, StreamContext& context ) = 0;
             
             // Stream Management
             virtual void open_stream() = 0;
             virtual void close_stream() = 0;
-
+            virtual void run() =0;
             virtual void start_stream() = 0;
             virtual void stop_stream() = 0;
 
@@ -53,7 +54,7 @@ namespace AudioEngine {
             AudioDevice m_playbackDevice;
             AudioDevice m_captureDevice;
             StreamConfig m_config;
-
+            std::atomic<bool> m_running{false};
     };
 }
 

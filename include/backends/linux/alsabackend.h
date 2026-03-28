@@ -3,6 +3,7 @@
 #include <vector>
 #include <alsa/asoundlib.h>
 #include "../audiobackend.h"
+#include <thread>
 #include <string>
 #include <iostream>
 namespace AudioEngine {
@@ -19,7 +20,9 @@ namespace AudioEngine {
             ~ALSABackend() {
                 if(m_handle) {
                     snd_pcm_close(m_handle);
+                    close_stream();
                 }
+
             };
             void iniitialize() override;
             std::vector<AudioDevice> enumerate_devices() override;
@@ -37,13 +40,11 @@ namespace AudioEngine {
 
                 // Get Supported Sample formats
                 if (snd_pcm_hw_params_test_format(m_handle, params, SND_PCM_FORMAT_FLOAT_LE) == 0) {
-                    std::cout << "Device supports S32 Float LE!" << std::endl;
 
                     dev.capabilities.supportedFormats.push_back(SampleFormat::Float32);
                 }
 
                 if (snd_pcm_hw_params_test_format(m_handle, params, SND_PCM_FORMAT_S16_LE) == 0) {
-                    std::cout << "Device supports S16 Integer!" << std::endl;
                     dev.capabilities.supportedFormats.push_back(SampleFormat::Int16);
 
                 }
@@ -83,13 +84,11 @@ namespace AudioEngine {
 
                 // Test for Interleaved support
                 if (snd_pcm_hw_params_test_access(m_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED) == 0) {
-                    std::cout << "Device supports Interleaved (LRLR)" << std::endl;
                     caps.supportedBufferFormats.push_back(BufferFormat::Interleaved);
                 }
 
                 // Test for Planar (Non-Interleaved) support
                 if (snd_pcm_hw_params_test_access(m_handle, params, SND_PCM_ACCESS_RW_NONINTERLEAVED) == 0) {
-                    std::cout << "Device supports Planar (LLL RRR)" << std::endl;
                     caps.supportedBufferFormats.push_back(BufferFormat::Planar);
 
                 }
@@ -129,21 +128,23 @@ namespace AudioEngine {
             void set_buffer_szie(int bufferSize) override;
 
             // Audio Callback
-            void process_audio(AudioBuffer& input, AudioBuffer& output, StreamContext& context ) override;
+            void process_audio(float* input, float* output, StreamContext& context ) override;
             
             // Stream Management
             void open_stream() override;
             bool open_playback();
             void close_stream() override;
-
+            void run() override;
             void start_stream() override;
             void stop_stream() override;
 
-            // Test sines
+            // Generate an Interleaved sine in float 32 Little Endian
             std::vector<float> gen_inter_sine_float(float freq);
             void play_sine(float freq);
         private:
-        snd_pcm_t* m_handle = nullptr;
+            snd_pcm_t* m_handle = nullptr;
+            std::thread m_thread;
+            TestTone m_tone;
         
     };
 

@@ -71,7 +71,6 @@ namespace AudioEngine {
     
     void ALSABackend::iniitialize() {
         enumerate_devices();
-        open_playback();
         
     }
     
@@ -98,30 +97,83 @@ namespace AudioEngine {
     };
 
     // Audio Callback
-        void ALSABackend::process_audio(AudioBuffer& input, AudioBuffer& output, StreamContext& context )  {
-        throw new std::runtime_error("Not implemented");
-    };
+        void ALSABackend::process_audio(float* input, float* output, StreamContext& context )  {
+        
+
+        // Inside your process_audio(float* outputBuffer, int numFrames)
+        for (int i = 0; i < 1024 ; i++) {
+            // Standard Sine Formula: sin(2 * PI * frequency * time)
+            output[i] = m_tone.amplitude * sinf(m_tone.phase);
+            
+            // Update phase based on frequency and sample rate
+            m_tone.phase += 2.0f * M_PI * m_tone.frequency / m_tone.sampleRate;
+
+            // Keep phase within [0, 2*PI] to avoid precision issues over time
+            if (m_tone.phase >= 2.0f * M_PI) {
+                m_tone.phase -= 2.0f * M_PI;
+            }
+        }
+            };
     
     // Stream Management
-        void ALSABackend::open_stream()  {
-        throw new std::runtime_error("Not implemented");
+    void ALSABackend::open_stream()  {
+        open_playback();
+        //printf("Stream opened");
     };
         void ALSABackend::close_stream()  {
-        throw new std::runtime_error("Not implemented");
+            stop_stream();
     };
 
-        void ALSABackend::start_stream()  {
-        throw new std::runtime_error("Not implemented");
+    void ALSABackend::run() {
+        // 1. Prepare a local buffer for the callback to fill
+        // 512 frames * 2 channels = 1024 floats
+        const unsigned int framesPerBuffer = 512;
+        std::vector<float> capture_buffer(framesPerBuffer * 2);
+        std::vector<float> playback_buffer(framesPerBuffer * 2);
+
+        while (m_running) {
+
+            StreamContext context; 
+            context.sampleRate = m_sampleRate;
+            process_audio(capture_buffer.data(), playback_buffer.data(), context);
+
+            // 3. Write that data to the hardware
+            snd_pcm_sframes_t written = snd_pcm_writei(m_handle, playback_buffer.data(), framesPerBuffer);
+
+            // 4. Error Recovery (Underruns)
+            if (written == -EPIPE) {
+                snd_pcm_prepare(m_handle);
+            } else if (written < 0) {
+                // Serious error - might want to break or log
+                m_running = false;
+            }
+        }
+    }
+
+    // Open a high priority thread to call the audio callback function.
+    void ALSABackend::start_stream()  {
+        if (m_running || !m_handle) return;
+
+        m_running = true;
+        
+   
+        printf("Thread opened.");
+        m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
+        // Set thread priority
+        sched_param sch;
+        sch.sched_priority = 20; 
+        pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &sch);
     };
-        void ALSABackend::stop_stream()  {
-        throw new std::runtime_error("Not implemented");
+    void ALSABackend::stop_stream()  {
+        m_running = false;
+        if (m_thread.joinable()) {
+            m_thread.join();
+        }
     };
 
     bool ALSABackend::open_playback() {
         snd_pcm_hw_params_t* params;
-        snd_pcm_t *handle;
         int err;
-
         // 1. Open PCM device for playback
         if ((err = snd_pcm_open(&m_handle, m_config.outputDeviceName.value().c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
             std::cerr << "Playback open error: " << snd_strerror(err) << std::endl;
@@ -140,8 +192,8 @@ namespace AudioEngine {
         snd_pcm_hw_params_set_format(m_handle, params, SND_PCM_FORMAT_FLOAT_LE);
         
         snd_pcm_hw_params_set_channels(m_handle, params, m_config.inputChannels);
-        snd_pcm_hw_params_set_rate_near(m_handle, params, &m_config.sampleRate, 0);
-
+        int actualSRate = snd_pcm_hw_params_set_rate_near(m_handle, params, &m_config.sampleRate, 0);
+        m_config.sampleRate = actualSRate;
         // 4. Write the parameters to the driver
         if ((err = snd_pcm_hw_params(m_handle, params)) < 0) {
             std::cerr << "Unable to set HW parameters: " << snd_strerror(err) << std::endl;

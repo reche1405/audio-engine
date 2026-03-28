@@ -102,6 +102,15 @@ struct StreamContext {
     bool isSilence;
 };
 
+struct TestTone {
+    TestTone() {};
+    ~TestTone() = default;
+        float phase = 0.0f; 
+        float frequency = 440.0f; // A4 note
+        float sampleRate = DEFAULT_SAMPLE_RATE;
+        float amplitude = 0.5f; 
+};
+
 // Latency measurements
 struct LatencyInfo {
     double theoreticalMs;     // bufferSize / sampleRate * 1000
