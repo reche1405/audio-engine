@@ -5,14 +5,14 @@
 #include <string>
 #include <vector>
 #include <optional>
-
+#include <atomic>
 #include <iostream>
 #include <iomanip>
 
 namespace AudioEngine {
 
     const unsigned int DEFAULT_SAMPLE_RATE = 48000;
-    const uint64_t DEFAULT_BUFFER_SIZE = 512;
+    const uint64_t DEFAULT_BUFFER_SIZE = 1024;
     const int DEFAULT_CHANNELS = 2;
 // Audio format support
 enum class SampleFormat {
@@ -97,7 +97,7 @@ struct StreamConfig {
 };
 
 struct StreamContext {
-    double sampleRate;
+    unsigned int sampleRate = DEFAULT_SAMPLE_RATE;
     uint64_t streamTime;
     bool isSilence;
 };
@@ -105,8 +105,8 @@ struct StreamContext {
 struct TestTone {
     TestTone() {};
     ~TestTone() = default;
-        float phase = 0.0f; 
-        float frequency = 440.0f; // A4 note
+        std::atomic<float> phase = 0.0f; 
+        std::atomic<float> frequency = 440.0f; // A4 note
         float sampleRate = DEFAULT_SAMPLE_RATE;
         float amplitude = 0.5f; 
 };

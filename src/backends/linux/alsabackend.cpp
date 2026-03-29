@@ -97,23 +97,24 @@ namespace AudioEngine {
     };
 
     // Audio Callback
-        void ALSABackend::process_audio(float* input, float* output, StreamContext& context )  {
-        
+    void ALSABackend::process_audio(float* input, float* output, StreamContext& context )  {
 
-        // Inside your process_audio(float* outputBuffer, int numFrames)
-        for (int i = 0; i < 1024 ; i++) {
+        static float localPhase = m_tone.phase.load();
+        
+        for (int i = 0; i < m_bufferSize * 2; i++) {
             // Standard Sine Formula: sin(2 * PI * frequency * time)
-            output[i] = m_tone.amplitude * sinf(m_tone.phase);
+            output[i] = 0.5f * sinf(localPhase);
             
             // Update phase based on frequency and sample rate
-            m_tone.phase += 2.0f * M_PI * m_tone.frequency / m_tone.sampleRate;
+            localPhase += 2.0f * M_PI * 440.0f / context.sampleRate;
 
             // Keep phase within [0, 2*PI] to avoid precision issues over time
-            if (m_tone.phase >= 2.0f * M_PI) {
-                m_tone.phase -= 2.0f * M_PI;
+            if (localPhase >= 2.0f * M_PI) {
+                localPhase -= 2.0f * M_PI;
             }
         }
-            };
+        m_tone.phase.store(localPhase);
+    };
     
     // Stream Management
     void ALSABackend::open_stream()  {
@@ -126,19 +127,17 @@ namespace AudioEngine {
 
     void ALSABackend::run() {
         // 1. Prepare a local buffer for the callback to fill
-        // 512 frames * 2 channels = 1024 floats
-        const unsigned int framesPerBuffer = 512;
-        std::vector<float> capture_buffer(framesPerBuffer * 2);
-        std::vector<float> playback_buffer(framesPerBuffer * 2);
-
+        std::vector<float> capture_buffer(m_config.bufferSize * 2);
+        std::vector<float> playback_buffer(m_config.bufferSize * 2);
+        StreamContext context; 
+        context.sampleRate = m_config.sampleRate;
+        
         while (m_running) {
 
-            StreamContext context; 
-            context.sampleRate = m_sampleRate;
             process_audio(capture_buffer.data(), playback_buffer.data(), context);
 
             // 3. Write that data to the hardware
-            snd_pcm_sframes_t written = snd_pcm_writei(m_handle, playback_buffer.data(), framesPerBuffer);
+            snd_pcm_sframes_t written = snd_pcm_writei(m_handle, playback_buffer.data(), m_config.bufferSize);
 
             // 4. Error Recovery (Underruns)
             if (written == -EPIPE) {
@@ -157,12 +156,13 @@ namespace AudioEngine {
         m_running = true;
         
    
-        printf("Thread opened.");
-        m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
+        printf("Thread opened.\n");
         // Set thread priority
+        m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
         sched_param sch;
-        sch.sched_priority = 20; 
-        pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &sch);
+        sch.sched_priority = 60; 
+        int thread_err = pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &sch);
+        std::cout << "Thread Schedule - 0 Means priority was accepted: " << thread_err << std::endl;
     };
     void ALSABackend::stop_stream()  {
         m_running = false;
@@ -174,6 +174,7 @@ namespace AudioEngine {
     bool ALSABackend::open_playback() {
         snd_pcm_hw_params_t* params;
         int err;
+        std::cout << "Output device name: " << m_config.outputDeviceName.value() << std::endl;
         // 1. Open PCM device for playback
         if ((err = snd_pcm_open(&m_handle, m_config.outputDeviceName.value().c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
             std::cerr << "Playback open error: " << snd_strerror(err) << std::endl;
@@ -191,9 +192,25 @@ namespace AudioEngine {
         // Signed 16-bit little-endian (Standard)
         snd_pcm_hw_params_set_format(m_handle, params, SND_PCM_FORMAT_FLOAT_LE);
         
-        snd_pcm_hw_params_set_channels(m_handle, params, m_config.inputChannels);
-        int actualSRate = snd_pcm_hw_params_set_rate_near(m_handle, params, &m_config.sampleRate, 0);
-        m_config.sampleRate = actualSRate;
+        snd_pcm_hw_params_set_channels(m_handle, params, m_config.outputChannels);
+
+        snd_pcm_hw_params_set_rate_near(m_handle, params, &m_config.sampleRate, 0);
+        unsigned int actualSRate; 
+        snd_pcm_hw_params_get_rate(params, &actualSRate,0);
+        std::cout << "Actual Sample Rate: " << actualSRate << std::endl;
+
+
+        m_config.sampleRate = (unsigned int) actualSRate;
+        unsigned long periodSize = (unsigned long) m_config.bufferSize;
+
+        unsigned long bufferSize = periodSize * 4;
+
+        snd_pcm_hw_params_set_buffer_size_near(m_handle, params, &bufferSize);
+        snd_pcm_hw_params_set_period_size_near(m_handle, params, &periodSize, 0);
+        unsigned long actualPeriod; 
+        snd_pcm_hw_params_get_period_size(params,&actualPeriod,0 );
+        std::cout << "Actual Period size: " << actualPeriod << std::endl;
+
         // 4. Write the parameters to the driver
         if ((err = snd_pcm_hw_params(m_handle, params)) < 0) {
             std::cerr << "Unable to set HW parameters: " << snd_strerror(err) << std::endl;
@@ -210,7 +227,7 @@ namespace AudioEngine {
     }
 
     std::vector<float> ALSABackend::gen_inter_sine_float(float freq) {
-        int frames = m_config.bufferSize;
+        int frames = m_config.bufferSize * 2;
         unsigned int sRate = m_config.sampleRate;
         int nChannels = m_config.outputChannels;
         std::vector<float> buffer; 
@@ -233,6 +250,7 @@ namespace AudioEngine {
         }
         return buffer;
     }
+    
     void ALSABackend::play_sine(float freq) {
         while(true) {
             auto buffer = gen_inter_sine_float(freq);
