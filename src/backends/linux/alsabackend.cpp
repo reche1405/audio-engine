@@ -226,6 +226,61 @@ namespace AudioEngine {
         return true;
     }
 
+    bool ALSABackend::open_capture() {
+        snd_pcm_hw_params_t* params;
+        int err;
+        std::cout << "Input device name: " << m_config.inputDeviceName.value() << std::endl;
+        // 1. Open PCM device for playback
+        if ((err = snd_pcm_open(&m_handle, m_config.inputDeviceName.value().c_str(), SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+            std::cerr << "Playback open error: " << snd_strerror(err) << std::endl;
+            return false;
+        }
+
+        // 2. Allocate and fill hw_params with default values
+        snd_pcm_hw_params_alloca(&params);
+        snd_pcm_hw_params_any(m_handle, params);
+
+        // 3. Set the hardware parameters
+        // Interleaved access (LRLR)
+        snd_pcm_hw_params_set_access(m_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+        
+        // Signed 16-bit little-endian (Standard)
+        snd_pcm_hw_params_set_format(m_handle, params, SND_PCM_FORMAT_FLOAT_LE);
+        
+        snd_pcm_hw_params_set_channels(m_handle, params, m_config.outputChannels);
+
+        snd_pcm_hw_params_set_rate_near(m_handle, params, &m_config.sampleRate, 0);
+        unsigned int actualSRate; 
+        snd_pcm_hw_params_get_rate(params, &actualSRate,0);
+        std::cout << "Actual Sample Rate: " << actualSRate << std::endl;
+
+
+        m_config.sampleRate = (unsigned int) actualSRate;
+        unsigned long periodSize = (unsigned long) m_config.bufferSize;
+
+        unsigned long bufferSize = periodSize * 4;
+
+        snd_pcm_hw_params_set_buffer_size_near(m_handle, params, &bufferSize);
+        snd_pcm_hw_params_set_period_size_near(m_handle, params, &periodSize, 0);
+        unsigned long actualPeriod; 
+        snd_pcm_hw_params_get_period_size(params,&actualPeriod,0 );
+        std::cout << "Actual Period size: " << actualPeriod << std::endl;
+
+        // 4. Write the parameters to the driver
+        if ((err = snd_pcm_hw_params(m_handle, params)) < 0) {
+            std::cerr << "Unable to set HW parameters: " << snd_strerror(err) << std::endl;
+            return false;
+        }
+
+        // 5. Prepare the interface
+        if ((err = snd_pcm_prepare(m_handle)) < 0) {
+            std::cerr << "Prepare error: " << snd_strerror(err) << std::endl;
+            return false;
+        }
+
+        return true;
+
+    }
     std::vector<float> ALSABackend::gen_inter_sine_float(float freq) {
         int frames = m_config.bufferSize * 2;
         unsigned int sRate = m_config.sampleRate;

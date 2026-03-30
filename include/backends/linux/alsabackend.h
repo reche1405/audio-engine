@@ -133,6 +133,7 @@ namespace AudioEngine {
             // Stream Management
             void open_stream() override;
             bool open_playback();
+            bool open_capture();
             void close_stream() override;
             void run() override;
             void start_stream() override;

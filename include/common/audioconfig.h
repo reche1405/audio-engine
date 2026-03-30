@@ -120,5 +120,10 @@ struct LatencyInfo {
     int xruns;                // Buffer over/under runs
 };
 
+struct Listener {
+
+    virtual void on_buffer_request(float* buffer, uint32_t frames) = 0;
+};
+
 }
 #endif

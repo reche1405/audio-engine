@@ -18,8 +18,10 @@ namespace AudioEngine {
 
             virtual void iniitialize() = 0;
             virtual std::vector<AudioDevice> enumerate_devices() = 0;
+            void set_listener(Listener *listener) {
+                m_listener = listener;
+            }
 
-            //virtual DeviceCapabilities device_capabilities(std::string deviceUID) = 0;
             // Select Devices
 
             virtual void set_input_device(AudioDevice &dev) = 0;
@@ -55,6 +57,7 @@ namespace AudioEngine {
             AudioDevice m_captureDevice;
             StreamConfig m_config;
             std::atomic<bool> m_running{false};
+            Listener * m_listener;
     };
 }
 

@@ -16,8 +16,6 @@
             sleep(5);
 
         } 
-        
-        //backend.play_sine(440.0f);
         return 0;
     }
 
