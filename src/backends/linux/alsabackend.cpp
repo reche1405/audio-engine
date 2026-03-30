@@ -71,6 +71,8 @@ namespace AudioEngine {
     
     void ALSABackend::iniitialize() {
         enumerate_devices();
+        open_stream();
+        start_stream();
         
     }
     
@@ -134,8 +136,8 @@ namespace AudioEngine {
         
         while (m_running) {
 
-            process_audio(capture_buffer.data(), playback_buffer.data(), context);
-
+            // process_audio(capture_buffer.data(), playback_buffer.data(), context);
+            m_listener->on_buffer_request(playback_buffer.data(), m_config.bufferSize);
             // 3. Write that data to the hardware
             snd_pcm_sframes_t written = snd_pcm_writei(m_handle, playback_buffer.data(), m_config.bufferSize);
 
@@ -160,7 +162,7 @@ namespace AudioEngine {
         // Set thread priority
         m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
         sched_param sch;
-        sch.sched_priority = 60; 
+        sch.sched_priority = 80; 
         int thread_err = pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &sch);
         std::cout << "Thread Schedule - 0 Means priority was accepted: " << thread_err << std::endl;
     };

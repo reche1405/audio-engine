@@ -6,15 +6,24 @@ project(AudioEngine)
 find_package(ALSA REQUIRED)
 
 set(SOURCE_FILES 
-    ./src/main.cpp 
-    ./src/backends/linux/alsabackend.cpp
-    ./src/devices/audiodevice.cpp
+   
+    ./include/testprocess.h
+
+    ./include/audioengine.h
 
     ./include/common/audioexception.h
     ./include/common/audioconfig.h
+    ./include/common/audioprocess.h
+
     ./include/backends/audiobackend.h
+    ./include/backends/backendfactory.h
     ./include/backends/linux/alsabackend.h
     ./include/devices/audiodevice.h
+
+    ./src/testprocess.cpp
+    ./src/main.cpp 
+    ./src/backends/linux/alsabackend.cpp
+    ./src/devices/audiodevice.cpp
 
 )
 

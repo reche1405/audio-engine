@@ -1,13 +1,14 @@
 
 #include <iostream>
-#include "../include/backends/linux/alsabackend.h"
+//#include "../include/backends/linux/alsabackend.h"
+#include "../include/audioengine.h"
+#include "../include/testprocess.h"
+int main(int argc,char *argv[]) {
 
-    int main(int argc,char *argv[]) {
-
-        AudioEngine::ALSABackend backend;
-        backend.iniitialize();
-        backend.open_stream();
-        backend.start_stream();
+        AudioEngine::AudioEngine engine;
+        AudioEngine::TestProcess process;
+        engine.set_process(&process);
+        engine.initialise();
         int i =0;
        while (true)
         {

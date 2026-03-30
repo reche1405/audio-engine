@@ -12,9 +12,8 @@ namespace AudioEngine {
 
             void initialise() {
                 m_backend = BackendFactory::createBackend();
-                m_backend .get()->set_listener(this);
+                m_backend.get()->set_listener(this);
                 m_backend.get()->iniitialize();
-                m_backend.get()->open_stream();
 
             }
 

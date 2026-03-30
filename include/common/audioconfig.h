@@ -121,7 +121,7 @@ struct LatencyInfo {
 };
 
 struct Listener {
-
+    
     virtual void on_buffer_request(float* buffer, uint32_t frames) = 0;
 };
 

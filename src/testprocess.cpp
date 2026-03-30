@@ -1,0 +1,18 @@
+#include "../include/testprocess.h"
+namespace AudioEngine {
+    void TestProcess::process_audio(float *buffer, uint32_t frames)  {
+        float localPhase = phase.load();
+        for (int i = 0; i < frames * 2; i++) {
+            buffer[i] = 0.5f * sinf(localPhase);
+
+            // Update phase based on frequency and sample rate
+            localPhase += 2.0f * M_PI * 440.0f / sampleRate;
+
+            // Keep phase within [0, 2*PI] to avoid precision issues over time
+            if (localPhase >= 2.0f * M_PI) {
+                localPhase -= 2.0f * M_PI;
+            }
+        }
+        phase.store(localPhase);
+    }
+}
