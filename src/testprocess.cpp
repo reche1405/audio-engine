@@ -5,10 +5,9 @@ namespace AudioEngine {
         for (int i = 0; i < frames * 2; i++) {
             buffer[i] = 0.5f * sinf(localPhase);
 
-            // Update phase based on frequency and sample rate
             localPhase += 2.0f * M_PI * 440.0f / sampleRate;
 
-            // Keep phase within [0, 2*PI] to avoid precision issues over time
+            // Keep phase within [0, 2*PI] to avoid precision drift
             if (localPhase >= 2.0f * M_PI) {
                 localPhase -= 2.0f * M_PI;
             }

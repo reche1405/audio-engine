@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include <math.h>
 #include "../include/backends/linux/alsabackend.h"
 
@@ -162,7 +164,8 @@ namespace AudioEngine {
         // Set thread priority
         m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
         sched_param sch;
-        sch.sched_priority = 80; 
+        
+        sch.sched_priority = 70; 
         int thread_err = pthread_setschedparam(m_thread.native_handle(), SCHED_FIFO, &sch);
         std::cout << "Thread Schedule - 0 Means priority was accepted: " << thread_err << std::endl;
     };
@@ -324,3 +327,4 @@ namespace AudioEngine {
         }
     }
 }
+#endif

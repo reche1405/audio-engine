@@ -4,6 +4,7 @@
 #include <vector>
 #include <atomic>
 #include <memory>
+#include <thread>
 #include "../common/audioconfig.h"
 #include "../common/audiobuffer.h"
 #include "../devices/audiodevice.h"
@@ -18,6 +19,7 @@ namespace AudioEngine {
 
             virtual void iniitialize() = 0;
             virtual std::vector<AudioDevice> enumerate_devices() = 0;
+
             void set_listener(Listener *listener) {
                 m_listener = listener;
             }
@@ -50,6 +52,7 @@ namespace AudioEngine {
 
         protected:
             BackendType m_type;
+            std::thread m_thread;
             int m_sampleRate = DEFAULT_SAMPLE_RATE;
             int m_bufferSize = DEFAULT_BUFFER_SIZE;
             std::vector<AudioDevice> m_deviceCache;

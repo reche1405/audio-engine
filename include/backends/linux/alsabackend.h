@@ -1,3 +1,4 @@
+#ifdef __linux__
 #ifndef ALSABACKEND_H
 #define ALSABACKEND_H
 #include <vector>
@@ -7,10 +8,9 @@
 #include <string>
 #include <iostream>
 namespace AudioEngine {
-    /* std::vector<std::pair<BufferFormat, snd_pcm_access_t>> ABuffFormats {
-        {BufferFormat::Interleaved, SND_PCM_ACCESS_RW_INTERLEAVED},
-        {BufferFormat::Planar, SND_PCM_ACCESS_RW_NONINTERLEAVED }
-    }; */
+    /*
+        Default Linux intergration, supported by a majority of linux distributions.
+     */
     class ALSABackend : public IAudioBackend {
         public:
             ALSABackend() : IAudioBackend(BackendType::ALSA) {
@@ -119,6 +119,7 @@ namespace AudioEngine {
             void set_input_device(AudioDevice &dev) override;
 
             void set_output_device(AudioDevice &dev) override;
+            
 
 
             // Sample Rate Management
@@ -144,7 +145,6 @@ namespace AudioEngine {
             void play_sine(float freq);
         private:
             snd_pcm_t* m_handle = nullptr;
-            std::thread m_thread;
             TestTone m_tone;
         
     };
@@ -153,4 +153,5 @@ namespace AudioEngine {
 }
 
 
+#endif
 #endif

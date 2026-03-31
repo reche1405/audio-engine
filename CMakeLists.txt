@@ -17,18 +17,27 @@ set(SOURCE_FILES
 
     ./include/backends/audiobackend.h
     ./include/backends/backendfactory.h
-    ./include/backends/linux/alsabackend.h
     ./include/devices/audiodevice.h
-
+    
     ./src/testprocess.cpp
     ./src/main.cpp 
-    ./src/backends/linux/alsabackend.cpp
     ./src/devices/audiodevice.cpp
+    
+    )
+if (UNIX) 
+    set(SOURCE_FILES ${SOURCE_FILES}
+        ./include/backends/linux/alsabackend.h
+        ./src/backends/linux/alsabackend.cpp
+    )
+endif (UNIX)
 
-)
-
+if (WIN32)
+    #[[ WINDOWS INCLUDES AND SOURCE FILES WILL GO HERE ]]
+endif (WIN32)
 add_executable(AUDIO_ENGINE ${SOURCE_FILES})
 target_include_directories(AUDIO_ENGINE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+if (UNIX) 
 
-target_link_libraries(AUDIO_ENGINE PRIVATE ALSA::ALSA)
+    target_link_libraries(AUDIO_ENGINE PRIVATE ALSA::ALSA)
+endif(UNIX)
