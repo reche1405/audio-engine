@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <optional>
 #include <atomic>
 #include <iostream>
 #include <iomanip>
@@ -70,8 +69,8 @@ struct DeviceCapabilities {
 // Audio configuration for a stream
 struct StreamConfig {
     // Device selection
-    std::optional<std::string> inputDeviceName;
-    std::optional<std::string> outputDeviceName;
+    std::string inputDeviceName;
+    std::string outputDeviceName;
 
     // Stream parameters
     unsigned int  sampleRate = DEFAULT_SAMPLE_RATE;

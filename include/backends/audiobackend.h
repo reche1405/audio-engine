@@ -1,6 +1,5 @@
 #ifndef AUDIOBACKEND_H
 #define AUDIOBACKEND_H
-#include <optional>
 #include <vector>
 #include <atomic>
 #include <memory>

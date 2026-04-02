@@ -10,14 +10,14 @@ int main(int argc,char *argv[]) {
         engine.set_process(&process);
         engine.initialise();
         int i =0;
-        std::cout << std::endl;
+       /*  std::cout << std::endl;
        while (true)
        {
             sleep(120);
             i+= 2;
             std::cout << i << std::endl;
 
-        } 
+        }  */
         return 0;
     }
 

@@ -1,9 +1,10 @@
 #ifdef _WIN32
 #ifndef WASAPIBACKEND_H
 #define WASAPIBACKEND_H
-#include "../audiobackend.h"
 
-#include <AudioClient.h>
+#include "../audiobackend.h"
+#include "../../common/audioconfig.h"
+#include <propidlbase.h>
 namespace AudioEngine {
     class WASAPIBackend : public IAudioBackend
     {
@@ -34,6 +35,15 @@ namespace AudioEngine {
             void run() override;
             void start_stream() override;
             void stop_stream() override;
+
+            void process_audio(float *,float *,StreamContext &) override;
+
+            // Internal Management
+            std::string to_std_string(PROPVARIANT var) {
+                std::wstring ws(var.pwszVal);
+                std::string str(ws.begin(), ws.end());
+                return str;
+            }
         
     };
 }

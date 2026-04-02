@@ -131,17 +131,20 @@ namespace AudioEngine {
 
     void ALSABackend::run() {
         // 1. Prepare a local buffer for the callback to fill
+        size_t blockSize = (size_t) m_config.bufferSize * m_config.outputChannels;
         std::vector<float> capture_buffer(m_config.bufferSize * 2);
         std::vector<float> playback_buffer(m_config.bufferSize * 2);
         StreamContext context; 
         context.sampleRate = m_config.sampleRate;
-        
         while (m_running) {
 
-            // process_audio(capture_buffer.data(), playback_buffer.data(), context);
-            m_listener->on_buffer_request(playback_buffer.data(), m_config.bufferSize);
+            // m_listener->on_buffer_request(playback_buffer.data(), m_config.bufferSize);
+
             // 3. Write that data to the hardware
-            snd_pcm_sframes_t written = snd_pcm_writei(m_handle, playback_buffer.data(), m_config.bufferSize);
+            snd_pcm_sframes_t written = snd_pcm_writei(
+                m_handle,
+                m_listener->ring_buffer()->popBlock(blockSize),
+                m_config.bufferSize);
 
             // 4. Error Recovery (Underruns)
             if (written == -EPIPE) {
@@ -179,9 +182,9 @@ namespace AudioEngine {
     bool ALSABackend::open_playback() {
         snd_pcm_hw_params_t* params;
         int err;
-        std::cout << "Output device name: " << m_config.outputDeviceName.value() << std::endl;
+        std::cout << "Output device name: " << m_config.outputDeviceName << std::endl;
         // 1. Open PCM device for playback
-        if ((err = snd_pcm_open(&m_handle, m_config.outputDeviceName.value().c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+        if ((err = snd_pcm_open(&m_handle, m_config.outputDeviceName.c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
             std::cerr << "Playback open error: " << snd_strerror(err) << std::endl;
             return false;
         }
@@ -234,9 +237,9 @@ namespace AudioEngine {
     bool ALSABackend::open_capture() {
         snd_pcm_hw_params_t* params;
         int err;
-        std::cout << "Input device name: " << m_config.inputDeviceName.value() << std::endl;
+        std::cout << "Input device name: " << m_config.inputDeviceName << std::endl;
         // 1. Open PCM device for playback
-        if ((err = snd_pcm_open(&m_handle, m_config.inputDeviceName.value().c_str(), SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+        if ((err = snd_pcm_open(&m_handle, m_config.inputDeviceName.c_str(), SND_PCM_STREAM_CAPTURE, 0)) < 0) {
             std::cerr << "Playback open error: " << snd_strerror(err) << std::endl;
             return false;
         }

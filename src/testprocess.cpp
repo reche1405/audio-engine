@@ -1,4 +1,7 @@
+#define _USE_MATH_DEFINES
 #include "../include/testprocess.h"
+#include <cmath>
+
 namespace AudioEngine {
     void TestProcess::process_audio(float *buffer, uint32_t frames)  {
         float localPhase = phase.load();

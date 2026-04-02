@@ -3,6 +3,7 @@
 #include "./common/audioprocess.h"
 #include "./backends/audiobackend.h"
 #include "./backends/backendfactory.h"
+#include "./common/ringbuffer.h"
 #include <memory>
 #include <cstdint>
 namespace AudioEngine {
@@ -11,7 +12,7 @@ namespace AudioEngine {
             ~AudioEngine() = default;
 
             void initialise() {
-                m_backend = BackendFactory::createBackend();
+                m_backend = BackendFactory::create_backend();
                 m_backend.get()->set_listener(this);
                 m_backend.get()->iniitialize();
 
@@ -26,10 +27,13 @@ namespace AudioEngine {
                 m_process->process_audio(buffer, frames);
             };
             
-
+            RingBuffer<float> &ring_buffer() {
+                return m_ringBuffer;
+            }
         private:
             AudioProcess *m_process = nullptr;
             std::unique_ptr<IAudioBackend> m_backend = nullptr;
+            RingBuffer<float> m_ringBuffer{2048};
     };
 }
 #endif

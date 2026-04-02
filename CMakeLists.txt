@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.23)
 project(AudioEngine)
 
 
-find_package(ALSA REQUIRED)
 
 set(SOURCE_FILES 
    
@@ -32,12 +31,16 @@ if (UNIX)
 endif (UNIX)
 
 if (WIN32)
-    #[[ WINDOWS INCLUDES AND SOURCE FILES WILL GO HERE ]]
+     set(SOURCE_FILES ${SOURCE_FILES}
+        ./include/backends/windows/wasapibackend.h
+        ./src/backends/windows/wasapibackend.cpp
+    )
 endif (WIN32)
 add_executable(AUDIO_ENGINE ${SOURCE_FILES})
 target_include_directories(AUDIO_ENGINE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if (UNIX) 
+    find_package(ALSA REQUIRED)
 
     target_link_libraries(AUDIO_ENGINE PRIVATE ALSA::ALSA)
 endif(UNIX)
