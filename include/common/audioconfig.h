@@ -8,7 +8,7 @@
 #include <iostream>
 #include <iomanip>
 
-namespace AudioEngine {
+namespace ioengine {
 
     const unsigned int DEFAULT_SAMPLE_RATE = 48000;
     const uint64_t DEFAULT_BUFFER_SIZE = 1024;
@@ -55,8 +55,8 @@ struct DeviceCapabilities {
 
     std::vector<SampleFormat> supportedFormats;
     std::vector<BufferFormat> supportedBufferFormats;
-    unsigned int maxInputChannels;
-    unsigned maxOutputChannels;
+    unsigned int maxInputChannels = 0;
+    unsigned maxOutputChannels = 0;
     bool supportsInput;
     bool supportsOutput;
     bool supportsDuplex;
@@ -119,10 +119,6 @@ struct LatencyInfo {
     int xruns;                // Buffer over/under runs
 };
 
-struct Listener {
-    
-    virtual void on_buffer_request(float* buffer, uint32_t frames) = 0;
-};
 
 }
 #endif

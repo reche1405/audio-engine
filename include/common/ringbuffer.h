@@ -5,7 +5,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace AudioEngine {
+namespace ioengine {
     template <typename T>
     class RingBuffer{
          private:

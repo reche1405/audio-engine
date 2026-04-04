@@ -1,5 +1,5 @@
 #include "../../include/devices/audiodevice.h"
-namespace AudioEngine {
+namespace ioengine {
 
     std::ostream& operator<<(std::ostream& os, const AudioDevice& dev) {
        os << "--- Audio Device ---\n"

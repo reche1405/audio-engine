@@ -4,10 +4,16 @@
 
 #include "../audiobackend.h"
 #include "../../common/audioconfig.h"
+#include <mmdeviceapi.h>
 #include <propidlbase.h>
-namespace AudioEngine {
+#include <wrl/client.h>
+namespace ioengine {
     class WASAPIBackend : public IAudioBackend
     {
+        private:
+            Microsoft::WRL::ComPtr<IMMDeviceEnumerator> m_enum;
+            Microsoft::WRL::ComPtr<IMMDeviceCollection> m_col;
+            HRESULT m_hr; 
         public:
             WASAPIBackend() : IAudioBackend(BackendType::WASAPI) {
 
@@ -15,9 +21,6 @@ namespace AudioEngine {
             void iniitialize() override;
             
             std::vector<AudioDevice> enumerate_devices() override;
-            void set_input_device(AudioDevice &dev) override;
-
-            void set_output_device(AudioDevice &dev) override;
 
 
             // Sample Rate Management
@@ -37,13 +40,15 @@ namespace AudioEngine {
             void stop_stream() override;
 
             void process_audio(float *,float *,StreamContext &) override;
+            void exit_on_error();
 
             // Internal Management
-            std::string to_std_string(PROPVARIANT var) {
-                std::wstring ws(var.pwszVal);
+            std::string to_std_string(PROPVARIANT *var) {
+                std::wstring ws(var->pwszVal);
                 std::string str(ws.begin(), ws.end());
                 return str;
             }
+            bool is_default_device(EDataFlow *flow, LPWSTR *id);
         
     };
 }

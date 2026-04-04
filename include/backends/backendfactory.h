@@ -5,7 +5,7 @@
 #include "./linux/alsabackend.h"
 #include "./windows/wasapibackend.h"
 #include <memory>
-namespace AudioEngine {
+namespace ioengine {
     class BackendFactory {
         public:
             ~BackendFactory() = default;
@@ -18,8 +18,9 @@ namespace AudioEngine {
                     default:
                         return std::make_unique<ALSABackend>();
                         break;
-                }              
-                #elif _WIN32
+                }  
+                #endif            
+                #ifdef _WIN32
                 switch(type) {
                     case (BackendType::Auto):
                         return std::make_unique<WASAPIBackend>();

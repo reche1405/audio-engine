@@ -3,7 +3,7 @@
 #include "./common/audioprocess.h"
 #include <atomic> 
 #include <cmath>
-namespace AudioEngine {
+namespace ioengine {
     class TestProcess : public AudioProcess {
         public:
             TestProcess() : AudioProcess() {};

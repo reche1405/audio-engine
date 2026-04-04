@@ -2,7 +2,7 @@
 #include "../include/testprocess.h"
 #include <cmath>
 
-namespace AudioEngine {
+namespace ioengine {
     void TestProcess::process_audio(float *buffer, uint32_t frames)  {
         float localPhase = phase.load();
         for (int i = 0; i < frames * 2; i++) {

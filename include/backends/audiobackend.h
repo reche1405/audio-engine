@@ -7,7 +7,7 @@
 #include "../common/audioconfig.h"
 #include "../common/audiobuffer.h"
 #include "../devices/audiodevice.h"
-namespace AudioEngine {
+namespace ioengine {
     class IAudioBackend {
         public:
             IAudioBackend(BackendType type = BackendType::Auto) : m_type(type) {
@@ -18,6 +18,9 @@ namespace AudioEngine {
 
             virtual void iniitialize() = 0;
             virtual std::vector<AudioDevice> enumerate_devices() = 0;
+            std::vector<AudioDevice> list_devices() {
+                return m_deviceCache;
+            }
 
             void set_listener(Listener *listener) {
                 m_listener = listener;
@@ -25,9 +28,17 @@ namespace AudioEngine {
 
             // Select Devices
 
-            virtual void set_input_device(AudioDevice &dev) = 0;
+             void set_input_device(AudioDevice &dev) {
+        
+                m_config.inputDeviceName = dev.UID;
+                m_captureDevice = dev;
+            };
 
-            virtual void set_output_device(AudioDevice &dev) = 0;
+            void set_output_device(AudioDevice &dev) {
+        
+                m_config.outputDeviceName = dev.UID;
+                m_playbackDevice = dev;
+            };
 
 
             // Sample Rate Management

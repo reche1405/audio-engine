@@ -4,9 +4,10 @@
 #include "./backends/audiobackend.h"
 #include "./backends/backendfactory.h"
 #include "./common/ringbuffer.h"
+#include "./common/listener.h"
 #include <memory>
 #include <cstdint>
-namespace AudioEngine {
+namespace ioengine {
     class AudioEngine : public Listener {
         public:
             ~AudioEngine() = default;
@@ -16,7 +17,7 @@ namespace AudioEngine {
                 m_backend.get()->set_listener(this);
                 m_backend.get()->iniitialize();
 
-            }
+            };
 
 
             void set_process(AudioProcess* process) {
@@ -27,9 +28,11 @@ namespace AudioEngine {
                 m_process->process_audio(buffer, frames);
             };
             
-            RingBuffer<float> &ring_buffer() {
+            RingBuffer<float> &ring_buffer() override {
                 return m_ringBuffer;
             }
+            std::vector<AudioDevice> list_capture_devices();
+            std::vector<AudioDevice> list_playback_devices();
         private:
             AudioProcess *m_process = nullptr;
             std::unique_ptr<IAudioBackend> m_backend = nullptr;

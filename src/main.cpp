@@ -5,11 +5,16 @@
 #include "../include/testprocess.h"
 int main(int argc,char *argv[]) {
 
-        AudioEngine::AudioEngine engine;
-        AudioEngine::TestProcess process;
+        ioengine::AudioEngine engine;
+        ioengine::TestProcess process;
         engine.set_process(&process);
         engine.initialise();
         int i =0;
+        std::cout << "Playback devices" << std::endl;
+        for (auto dev : engine.list_playback_devices()) {
+
+            std::cout << dev << std::endl;
+        }
        /*  std::cout << std::endl;
        while (true)
        {

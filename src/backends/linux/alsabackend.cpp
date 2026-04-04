@@ -3,7 +3,7 @@
 #include <math.h>
 #include "../include/backends/linux/alsabackend.h"
 
-namespace AudioEngine {
+namespace ioengine {
     std::vector<AudioDevice> ALSABackend::enumerate_devices() {
                 /* 
                 / Alsa operates different to other audio engines. 
@@ -78,16 +78,6 @@ namespace AudioEngine {
         
     }
     
-    void ALSABackend::set_input_device(AudioDevice &dev) {
-        
-        m_config.inputDeviceName = dev.UID;
-        m_captureDevice = dev;
-    };
-    
-    void ALSABackend::set_output_device(AudioDevice &dev)  {
-        m_playbackDevice = dev;
-        m_config.outputDeviceName = dev.UID;
-    };
 
 
     // Sample Rate Management
@@ -165,7 +155,7 @@ namespace AudioEngine {
    
         printf("Thread opened.\n");
         // Set thread priority
-        m_thread = std::thread(&AudioEngine::ALSABackend::run, this);
+        m_thread = std::thread(&ioengine::ALSABackend::run, this);
         sched_param sch;
         
         sch.sched_priority = 70; 

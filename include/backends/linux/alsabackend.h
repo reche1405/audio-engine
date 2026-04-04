@@ -7,7 +7,7 @@
 #include <thread>
 #include <string>
 #include <iostream>
-namespace AudioEngine {
+namespace ioengine {
     /*
         Default Linux intergration, supported by a majority of linux distributions.
      */
@@ -116,10 +116,6 @@ namespace AudioEngine {
 
             }
     
-            void set_input_device(AudioDevice &dev) override;
-
-            void set_output_device(AudioDevice &dev) override;
-            
 
 
             // Sample Rate Management

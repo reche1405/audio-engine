@@ -3,7 +3,7 @@
 #include "../common/audioconfig.h"
 #include <string>
 #include <algorithm>
-namespace AudioEngine {
+namespace ioengine {
     struct AudioDevice {
         public: 
             std::string name; 

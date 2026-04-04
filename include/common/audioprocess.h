@@ -1,7 +1,7 @@
 #ifndef AUDIOPROCESS_H
 #define AUDIOPROCESS_H
 #include <cstdint>
-namespace AudioEngine{
+namespace ioengine{
     class AudioProcess {
         public:
             ~AudioProcess() = default;

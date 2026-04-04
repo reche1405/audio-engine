@@ -2,7 +2,7 @@
 #define AUDIOBUFFER_H
 #include <vector>
 #include "audioconfig.h"
-namespace AudioEngine {
+namespace ioengine {
     template <typename T> 
     class AudioBuffer {
         public:

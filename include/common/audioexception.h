@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace AudioEngine {
+namespace ioengine {
 enum class AudioErrorCode {
     Success = 0,
     DeviceNotFound,
