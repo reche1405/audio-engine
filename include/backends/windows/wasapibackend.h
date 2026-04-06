@@ -13,7 +13,11 @@ namespace ioengine {
         private:
             Microsoft::WRL::ComPtr<IMMDeviceEnumerator> m_enum;
             Microsoft::WRL::ComPtr<IMMDeviceCollection> m_col;
+            IAudioClient *m_client;
+            IAudioRenderClient *m_renderClient;
             HRESULT m_hr; 
+            HANDLE m_buffEvent;
+
         public:
             WASAPIBackend() : IAudioBackend(BackendType::WASAPI) {
 

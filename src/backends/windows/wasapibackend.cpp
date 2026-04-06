@@ -3,6 +3,7 @@
 #include "../../../include/backends/windows/wasapibackend.h"
 #include <string>
 #include <AudioClient.h>
+#include <avrt.h>
 #include <mmdeviceapi.h>
 #include <Ksmedia.h>
 #include <combaseapi.h>
@@ -191,8 +192,36 @@ namespace ioengine {
     };
 
     void WASAPIBackend::run() {
-        throw new std::runtime_error("Not implemented");
+        DWORD taskIndex = 0;
+        // Register the thread as "Pro Audio"
+        HANDLE hTask = AvSetMmThreadCharacteristics("Audio I/O", &taskIndex);
 
+        if (hTask == NULL) {
+            // Fallback or error handling
+            throw new std::runtime_error("Unable to set thread priority.");
+        }
+        AvSetMmThreadPriority(hTask, AVRT_PRIORITY_HIGH);
+
+        // Set the priority within that class to "High"
+        UINT32 numFramesAvailable;
+        UINT32 numFramesPadding;
+        UINT32 bufferFrameCount = (UINT32) m_bufferSize;
+        BYTE *pData;
+        while(m_running) {
+            DWORD waitResult = WaitForSingleObject(m_buffEvent, 2000);   
+            if (waitResult == WAIT_OBJECT_0) {
+                // GetBuffer, Process, and ReleaseBuffer logic goes here
+                m_hr = m_client->GetCurrentPadding(&numFramesPadding);
+                numFramesAvailable = bufferFrameCount - numFramesPadding;
+                m_hr = m_renderClient->GetBuffer(numFramesAvailable, &pData);
+                float *fData = reinterpret_cast<float*>(pData);
+                int framesWritten = m_listener->ring_buffer().popBlock(fData, numFramesAvailable * 2);
+                m_hr = m_renderClient->ReleaseBuffer(numFramesAvailable, 0);
+
+                
+            }
+        }
+        AvRevertMmThreadCharacteristics(hTask);
 
     }
 
@@ -200,7 +229,7 @@ namespace ioengine {
         if (m_running) return;
 
         m_running = true;
-        std::thread(&WASAPIBackend::run, this);
+        m_thread = std::thread(&WASAPIBackend::run, this);
    
         printf("Thread opened.\n");
 
@@ -210,9 +239,26 @@ namespace ioengine {
 
     void WASAPIBackend::stop_stream()  {
         m_running = false;
+        SetEvent(m_buffEvent);
         if (m_thread.joinable()) {
             m_thread.join();
         }
+        CloseHandle(m_buffEvent);
+
+        m_hr = m_client->Stop();
+        exit_on_error();
+        
+        m_renderClient->Release();
+        exit_on_error();
+        
+        m_client->Release();
+        exit_on_error();
+
+        m_enum->Release();
+        exit_on_error();
+
+        CoUninitialize();
+
     };
 
     bool WASAPIBackend::open_playback() {
@@ -232,14 +278,14 @@ namespace ioengine {
         m_hr = pDevice->Activate(__uuidof(IAudioClient),
              CLSCTX_ALL,
              NULL,
-             (void**)&pClient    
+             (void**)&m_client    
         );
         exit_on_error();
 
-        m_hr = pClient->GetMixFormat(&pwfx);
+        m_hr = m_client->GetMixFormat(&pwfx);
         exit_on_error();
 
-        m_hr = pClient->Initialize(
+        m_hr = m_client->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             0,
             hnsRequestedDuration,
@@ -249,17 +295,17 @@ namespace ioengine {
         );
         exit_on_error();
 
-        m_hr = pClient->GetBufferSize(&bufferFrameCount);
+        m_hr = m_client->GetBufferSize(&bufferFrameCount);
         exit_on_error();
-
-        m_hr = pClient->GetService(
+        m_bufferSize = (int) bufferFrameCount;
+        m_hr = m_client->GetService(
             __uuidof(IAudioRenderClient),
-            (void**)&pRenderClient
+            (void**)&m_renderClient
         );
         exit_on_error();
 
 
-        m_hr = pRenderClient->GetBuffer(bufferFrameCount, &pData);
+        m_hr = m_renderClient->GetBuffer(bufferFrameCount, &pData);
 
         exit_on_error();
 
@@ -269,11 +315,18 @@ namespace ioengine {
         std::fill(initBuffer.begin(), initBuffer.end(), 0.0f);
         std::memcpy(fData, initBuffer.data(), bufferFrameCount * 2);
         //m_listener->ring_buffer()->popBlock(bufferFrameCount * 2)
-        m_hr = pRenderClient->ReleaseBuffer(bufferFrameCount, 0);
+        m_hr = m_renderClient->ReleaseBuffer(bufferFrameCount, 0);
         hnsActualDuration = (double)10000000 *
             bufferFrameCount / pwfx->nSamplesPerSec;
         exit_on_error();
-        m_hr = pClient->Start();
+
+        m_buffEvent = CreateEvent(FALSE, NULL, NULL, FALSE);
+        if(m_buffEvent == NULL) {
+            exit_on_error();
+        }
+        m_client->SetEventHandle(m_buffEvent);
+
+        m_hr = m_client->Start();
         exit_on_error();
         
     }

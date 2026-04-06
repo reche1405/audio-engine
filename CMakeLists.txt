@@ -41,11 +41,12 @@ endif (WIN32)
 add_executable(AUDIO_ENGINE ${SOURCE_FILES})
 target_include_directories(AUDIO_ENGINE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 if (UNIX) 
-    find_package(ALSA REQUIRED)
+find_package(ALSA REQUIRED)
 
-    target_link_libraries(AUDIO_ENGINE PRIVATE ALSA::ALSA)
+target_link_libraries(AUDIO_ENGINE PRIVATE ALSA::ALSA)
 endif(UNIX)
 if (WIN32)
-   
+
+target_link_libraries(AUDIO_ENGINE PRIVATE Avrt)
 
 endif (WIN32)

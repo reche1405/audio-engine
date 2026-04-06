@@ -5,6 +5,7 @@
 #include <memory>
 #include <thread>
 #include "../common/audioconfig.h"
+#include "../common/listener.h"
 #include "../common/audiobuffer.h"
 #include "../devices/audiodevice.h"
 namespace ioengine {
