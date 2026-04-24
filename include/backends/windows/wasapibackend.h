@@ -7,6 +7,7 @@
 #include <mmdeviceapi.h>
 #include <propidlbase.h>
 #include <wrl/client.h>
+#include <Audioclient.h>
 namespace ioengine {
     class WASAPIBackend : public IAudioBackend
     {
@@ -44,7 +45,7 @@ namespace ioengine {
             void stop_stream() override;
 
             void process_audio(float *,float *,StreamContext &) override;
-            void exit_on_error();
+            void exit_on_error(std::string message = "Something went wrong");
 
             // Internal Management
             std::string to_std_string(PROPVARIANT *var) {
@@ -52,7 +53,7 @@ namespace ioengine {
                 std::string str(ws.begin(), ws.end());
                 return str;
             }
-            bool is_default_device(EDataFlow *flow, LPWSTR *id);
+            bool is_default_device(EDataFlow flow, LPWSTR *id);
         
     };
 }

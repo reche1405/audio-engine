@@ -33,6 +33,8 @@ namespace ioengine {
             }
             std::vector<AudioDevice> list_capture_devices();
             std::vector<AudioDevice> list_playback_devices();
+            void open_stream();
+            void start_stream();
         private:
             AudioProcess *m_process = nullptr;
             std::unique_ptr<IAudioBackend> m_backend = nullptr;

@@ -5,7 +5,7 @@
 namespace ioengine {
     void TestProcess::process_audio(float *buffer, uint32_t frames)  {
         float localPhase = phase.load();
-        for (int i = 0; i < frames * 2; i++) {
+        for (int i = 0; i < frames * 2; i++ ) {
             buffer[i] = 0.5f * sinf(localPhase);
 
             localPhase += 2.0f * M_PI * 440.0f / sampleRate;

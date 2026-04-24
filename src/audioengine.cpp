@@ -7,10 +7,7 @@ namespace ioengine {
         for(auto  dev: devices) {
             std::cout << dev << std::endl;
             if(dev.capabilities.maxOutputChannels > 0) {
-                AudioDevice copy;
-
-                memcpy(&copy, &dev, sizeof(dev));
-                filtered.push_back(copy);
+                filtered.push_back(dev);
             }
         }
         return filtered;
@@ -26,5 +23,15 @@ namespace ioengine {
             }
         }
         return filtered;
+    }
+    void AudioEngine::open_stream() {
+
+        m_backend->open_stream();
+        printf("Stream opened!");
+    }
+    void AudioEngine::start_stream() {
+        m_backend->start_stream();
+        printf("Stream started!");
+
     }
 }
