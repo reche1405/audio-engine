@@ -234,7 +234,7 @@ namespace ioengine {
         m_hr = m_client->GetBufferSize(&bufferFrameCount);
         BYTE *pData;
         while(m_running) {
-            DWORD waitResult = WaitForSingleObject(m_buffEvent, 200);   
+            DWORD waitResult = WaitForSingleObject(m_buffEvent, 500);   
             if (waitResult == WAIT_OBJECT_0) {
                 // GetBuffer, Process, and ReleaseBuffer logic goes here
                 
@@ -251,13 +251,13 @@ namespace ioengine {
                 float *fData = reinterpret_cast<float*>(pData);
                 UINT32 framesInRingBuffer = m_listener->ring_buffer().availableSamples() / 2;
                 UINT32 framesToWrite = min(numFramesAvailable, framesInRingBuffer);
-                int framesWritten = m_listener->ring_buffer().popBlock(fData, framesToWrite * 2) / 2;
-                if (framesWritten < numFramesAvailable) {
+                int samplesPopped = m_listener->ring_buffer().popBlock(fData, framesToWrite * 2);
+                std::cout << samplesPopped << std::endl;
+                int samplesNeeded = numFramesAvailable * 2;
+                /* if (samplesPopped < samplesNeeded) {
                     // Fill remaining frames with silence
-                    int silenceFrames = numFramesAvailable - framesWritten;
-                    float* silenceStart = fData + (framesWritten * 2);  // Stereo interleaved
-                    memset(silenceStart, 0, silenceFrames * 2 * sizeof(float));
-                }
+                   std::memset(fData + samplesPopped, 0, (samplesNeeded - samplesPopped) * sizeof(float));
+                } */
                 m_hr = m_renderClient->ReleaseBuffer(numFramesAvailable, 0);
 
                 

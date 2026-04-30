@@ -53,20 +53,18 @@ namespace ioengine {
             size_t head = m_head.load(std::memory_order_relaxed);
             size_t tail = m_tail.load(std::memory_order_acquire);
 
-            // Calculate how much space is actually available
             size_t available = (tail - head - 1) & m_mask;
             size_t toWrite = std::min(count, available);
             if(toWrite == 0) return 0;
-            size_t firstPart = std::min(toWrite, m_capacity - head);
+            size_t firstPart = std::min(toWrite, (m_mask + 1) - head);
             std::memcpy(&m_buffer[head], data, firstPart * sizeof(T));
 
-            // 4. Second copy (The wrap-around)
             if (toWrite > firstPart) {
                 std::memcpy(&m_buffer[0], data + firstPart, (toWrite - firstPart) * sizeof(T));
             }
 
             m_head.store((head + toWrite) & m_mask, std::memory_order_release);
-            return toWrite; // Return how many we actually managed to push
+            return toWrite; 
         }
 
         // Pops multiple samples out of the buffer
@@ -77,7 +75,7 @@ namespace ioengine {
             size_t available = (head - tail) & m_mask;
             size_t toRead = std::min(count, available);
             if(toRead == 0) return 0;
-            size_t firstPart = std::min(toRead, m_capacity - tail);
+            size_t firstPart = std::min(toRead, (m_mask + 1) - tail);
             std::memcpy(data, &m_buffer[tail], firstPart * sizeof(T));
             if (toRead > firstPart) {
                 // Wrap around: copy the remaining from the start

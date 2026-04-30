@@ -38,7 +38,7 @@ namespace ioengine {
         private:
             AudioProcess *m_process = nullptr;
             std::unique_ptr<IAudioBackend> m_backend = nullptr;
-            RingBuffer<float> m_ringBuffer{2048};
+            RingBuffer<float> m_ringBuffer{4096};
     };
 }
 #endif
